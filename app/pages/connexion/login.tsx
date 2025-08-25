@@ -1,13 +1,20 @@
-import { Text, View, TextInput } from "react-native";
-import React from "react";
-import { Link } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
+import { Link } from "expo-router";
+import React from "react";
+import { Dimensions, Text, TextInput, View, KeyboardAvoidingView, Platform } from "react-native";
 
 
 
 export default function Login() {   
+  const initialWindowHeight = React.useRef(Dimensions.get('window').height).current;
+  const windowHeight = Dimensions.get('window').height;
+  const bottomPadding = windowHeight < 700 ? 16 : 24;
   return (
-    <View className="flex-1 bg-white">
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+    <View >
       <View className="h-full flex items-center justify-center">
         <View className="-mt-20">
             <Text className="text-center font-bold text-3xl ">Connexion</Text>
@@ -37,25 +44,31 @@ export default function Login() {
             </Link>
         </View>
       </View>
-      <View className="flex flex-row  -mt-60 p-4 gap-10">
-        <View className="bg-black h-[0.8px] w-32 "></View>
-        <Text className="mx-2 -mt-2 font-bold">ou</Text>
-        <View className="bg-black h-[0.8px] w-32 "></View>
-      </View>
+      
+      
 
-        <View className="flex flex-row justify-center gap-16 mt-4">
-            <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 flex items-center justify-center">
+    </View>
+    <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 24, paddingBottom: bottomPadding, paddingTop: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+          <Text style={{ marginHorizontal: 8, fontWeight: 'bold' }}>ou</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+        </View>
+
+        <View className="flex-row justify-center mt-4">
+          <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
             <Ionicons name="logo-google" size={24} color="black" />
-            </View>
-            <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 flex items-center justify-center">
+          </View>
+          <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
             <Ionicons name="logo-facebook" size={24} color="black" />
-            </View>
-          <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 flex items-center justify-center">
+          </View>
+          <View className="apple bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
             <Ionicons name="logo-apple" size={24} color="black" />
           </View>
         </View>
 
-      <Link href="/pages/connexion/forget-password" className="text-center mt-12 text-blue-500 font-semibold">Mot de passe oublié ? </Link>
-    </View>
+        <Link href="/pages/connexion/forget-password" className="text-center w-full mt-4 text-blue-500 font-semibold">Mot de passe oublié ? </Link>
+        </View>
+    </KeyboardAvoidingView>
   );
 }

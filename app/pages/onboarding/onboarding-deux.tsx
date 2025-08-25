@@ -5,7 +5,7 @@ import { Link } from "expo-router";
 
 export default function OnboardingUn() {
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white p-6">
       <View className="h-full flex items-center justify-center">
         <Image
           source={require("../../../assets/images/2.png")}
@@ -19,7 +19,7 @@ export default function OnboardingUn() {
       </View>
        <Link 
             href="/pages/onboarding/onboarding-trois" 
-            className="bg-[#606FEF] -mt-32 w-28 p-2 flex items-center justify-center rounded-lg ml-52">
+            className="bg-[#606FEF] -mt-20 w-full p-2 flex items-center justify-center rounded-lg ">
              <Text className=" text-center text-lg font-semibold text-white">Next</Text>
            </Link>          
    

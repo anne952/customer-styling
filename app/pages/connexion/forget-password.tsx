@@ -1,10 +1,10 @@
-import React from "react";
-import { Text, View, TextInput } from "react-native";
 import { Link } from "expo-router";
+import React from "react";
+import { Dimensions, Text, TextInput, View } from "react-native";
 
 export default function ForgetPassword() {
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" style={{ height: Dimensions.get('window').height }}>
          <View className="h-full flex items-center justify-center">
            <View className="-mt-20">
                <Text className="text-center font-bold text-xl ">Mot de passe oublié</Text>   
