@@ -19,7 +19,7 @@ export default function PaymentCodeScreen() {
     <View style={styles.container} className="mt-10">
       {/* Bouton retour */}
       
-        <Link href="/pages/transaction/code-payement" style={styles.backButton}>
+        <Link href="/pages/transaction/payement" style={styles.backButton}>
         <Ionicons name="arrow-back" size={24} color="#333" />
          </Link>
             

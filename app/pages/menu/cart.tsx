@@ -23,7 +23,7 @@ export default function Cart(){
                 <Text className="text-center text-gray-500 mt-10">Votre panier est vide.</Text>
               )}
               {items.map((it, idx) => (
-                <View key={`${it.id}-${it.size ?? ""}-${it.color ?? ""}-${idx}`} className="flex flex-row items-center bg-white rounded-xl p-3 shadow shadow-gray-200">
+                <View key={`${it.id}-${it.size ?? ""}-${it.color ?? ""}-${idx}`} className="flex flex-row items-center bg-white rounded-xl p-3 shadow shadow-gray-200 gap-6">
                   {it.image && (
                     <Image source={it.image} style={{ width: 72, height: 72, borderRadius: 8 }} />
                   )}
@@ -58,7 +58,7 @@ export default function Cart(){
                  <Text className="text-xl font-semibold"> TOTAL :</Text>
                  <Text className="total_produit text-xl font-semibold"> {totalPrice}F</Text>
              </View>
-             <Link href="/pages/transaction/payement" className="bg-blue-500 rounded-lg p-2">
+             <Link href="/pages/transaction/payement" className="bg-blue-500 rounded-lg p-2 text-center">
                  <Text className="font-semibold text-2xl text-center text-white">Acheter</Text>
              </Link>
             </View>

@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     marginTop: 30,
+    textAlign: "center"
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" , textAlign:"center"},
 });

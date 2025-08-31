@@ -14,7 +14,7 @@ interface addProps{
 
 export default function Add({image,name,prixPromo,prix,id}:addProps){
  return(
-    <View className="mt-28">
+    <View className="mt-28 ">
         <View className="flex flex-row">
             {image &&
             <Image 
@@ -35,7 +35,7 @@ export default function Add({image,name,prixPromo,prix,id}:addProps){
             <Ionicons name="remove-circle-outline" size={24} color="black"/>
             </View>
         </View>
-        <View className="border border-gray-400"></View>
+        <View className="border border-gray-400 p-4"></View>
     </View>
  )
 }

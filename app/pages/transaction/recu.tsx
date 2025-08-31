@@ -80,13 +80,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   section: {
-    marginTop: 20,
+    marginTop: 0,
     paddingVertical: 10,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    marginTop: 50,
   },
   productRow: {
     flexDirection: "row",

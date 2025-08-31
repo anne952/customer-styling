@@ -17,12 +17,9 @@ export default function PaymentSuccessScreen({ navigation }: any) {
       </View>
 
       {/* Bouton suivre la commande */}
-      <Link href="/pages/transaction/reçu" style={styles.button} >
-      <TouchableOpacity
-// adapter la route
-      >
+      <Link href="/pages/transaction/suvre-commande" style={styles.button} >
         <Text style={styles.buttonText}>Suivre la commande</Text>
-      </TouchableOpacity>
+
       </Link>
     </View>
   );

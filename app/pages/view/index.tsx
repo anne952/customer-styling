@@ -60,9 +60,9 @@ export default function Vu(){
   };
 
   return(
-        <View className="flex-1 bg-white mt-10 p-6">
-            <Link href="/pages/home" className="bg-blue-500 w-10 h-10 m-5 p-1 rounded-md">
-            <Ionicons name="chevron-back-outline" size={24} color="black"/>
+        <View className="flex-1 bg-white  p-6">
+            <Link href="/pages/home" className="bg-blue-500 w-10 h-10 m-5 p-1 rounded-md mt-10">
+            <Ionicons name="chevron-back-outline" size={24} color="white"/>
             </Link>
             {images.length > 0 && (
               <View
@@ -107,6 +107,9 @@ export default function Vu(){
                 horizontal={ false}
                 className="h-96"
                 >
+                  <Link href="/pages/vendeur/profil">
+                    <Text className="text-lg font-semibold p-4 mt-6 text-blue-500">Shooda fashion</Text>
+                  </Link>
                 <View className=" p-4 flex flex-row justify-between m-4">
                     <View>
                         <Text className=" text-xl font-bold ">{produitName} </Text>

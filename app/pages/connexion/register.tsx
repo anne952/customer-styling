@@ -35,12 +35,15 @@ export default function Login() {
                 style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
                 secureTextEntry={true}
             />
-          <Link href='/pages/connexion/login' className="text-blue-500 mt-2 font-semibold ">Se connecter</Link>
+            <View className='flex-row justify-center mt-4 gap-10'>
+              <Text>Vous avez déjà un compte ?</Text>
+              <Link href='/pages/connexion/login' className="text-blue-500  font-semibold ">Se connecter</Link>
+            </View>
         </View>
         <View className="mt-8">
             <Link 
                 href="/pages/connexion/register" 
-                className="text-white text-xl p-3 w-52 text-center bg-blue-500 font-semibold rounded-lg">
+                className="text-white text-xl w-72 p-3  text-center bg-blue-500 font-semibold rounded-lg">
                 S'inscrire
             </Link>
         </View>
