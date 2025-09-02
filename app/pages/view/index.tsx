@@ -61,7 +61,7 @@ export default function Vu(){
 
   return(
         <View className="flex-1 bg-white  p-6">
-            <Link href="/pages/home" className="bg-blue-500 w-10 h-10 m-5 p-1 rounded-md mt-10">
+            <Link href="/pages/(tabs)" className="bg-blue-500 w-10 h-10 m-5 p-1 rounded-md mt-10">
             <Ionicons name="chevron-back-outline" size={24} color="white"/>
             </Link>
             {images.length > 0 && (

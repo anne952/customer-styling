@@ -1,10 +1,7 @@
 import CartProduit from "@/components/cart-produit";
-import SideMenu from "@/components/menu";
 import CartProduits from "@/constant/cartProduit";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Link } from "expo-router";
 import { FlatList, Image, ScrollView, Text, TextInput, View } from "react-native";
 import Nav from "@/components/nav";
 
@@ -57,7 +54,6 @@ export default function HomeScreen() {
       </View>
       </ScrollView>
   
-         <Nav/>
     </View>
   );
 }

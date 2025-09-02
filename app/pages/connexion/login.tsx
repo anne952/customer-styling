@@ -9,9 +9,9 @@ export default function Login() {
   return (
     
       <View className='flex-1 bg-white'>
-        <Link href="/pages/home" className="text-blue-500 font-semibold mt-9 p-4">Ignorer</Link>
+        <Link href="/pages/(tabs)" className="text-blue-500 font-semibold mt-9 p-4 text-right">Ignorer</Link>
         <View className="h-full flex items-center justify-center">
-          <View className="-mt-24">
+          <View className="-mt-52">
             <Text className="text-center font-bold text-3xl">Connexion</Text>
             <Text className="text-center text-lg">Bienvenue !</Text>
           </View>
@@ -37,7 +37,7 @@ export default function Login() {
           
           <View className="mt-8">
             <Link 
-              href="/pages/home" 
+              href="/pages/(tabs)" 
               className="text-white text-xl p-3 w-52 text-center bg-blue-500 font-semibold rounded-lg"
             >
               Connecter
@@ -46,7 +46,7 @@ export default function Login() {
         </View>
       
       
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 12, paddingHorizontal: 24, paddingTop: 16 }}>
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 20, paddingHorizontal: 24, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
           <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
           <Text style={{ marginHorizontal: 8, fontWeight: 'bold' }}>ou</Text>

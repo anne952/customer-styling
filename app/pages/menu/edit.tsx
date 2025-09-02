@@ -12,7 +12,7 @@ export default function edit(){
  return(
     <View className="mt-20 p-6">
          <View className="flex flex-row gap-20">
-            <Link href="/pages/menu/profil" className="bg-blue-500 w-10 p-2 rounded-lg">
+            <Link href="/pages/(tabs)/profil" className="bg-blue-500 w-10 p-2 rounded-lg">
             <Ionicons name="chevron-back-outline" size={24} color="black"/>
             </Link>
             <Text className="text-xl font-bold mt-2">Modifier Profil</Text>            

@@ -63,7 +63,6 @@ export default function SearchScreen() {
       </View>
       
       <View className="absolute bottom-0 w-full">
-       <Nav/>
       </View>
     </View>
   );

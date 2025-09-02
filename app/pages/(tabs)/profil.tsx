@@ -9,7 +9,6 @@ export default function Profil(){
         <View className="flex-1">
           <SideMenu/>  
           <View className="bottom-0 absolute w-full">
-            <Nav/>
           </View>
         </View>
     )

@@ -22,7 +22,6 @@ export default function RootLayout() {
               <Stack.Screen name="pages/connexion/register" />
               <Stack.Screen name="pages/connexion/forget-password" />
 
-              <Stack.Screen name="pages/home" />
               <Stack.Screen name="pages/view" options={{ title: "index" }} />
 
               <Stack.Screen name="pages/menu/cart" />
@@ -33,7 +32,6 @@ export default function RootLayout() {
 
               <Stack.Screen name="pages/transaction/payement" />
               <Stack.Screen name="pages/transaction/code-payement" />
-              <Stack.Screen name="pages/transaction/historique" />
               <Stack.Screen name="pages/transaction/payement-succes" options={{ presentation: 'modal' }} />
               <Stack.Screen name="pages/transaction/reçu" />
               <Stack.Screen name="pages/transaction/suvre-commande" />
