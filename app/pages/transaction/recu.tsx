@@ -1,29 +1,25 @@
+import { useOrder } from "@/components/order-context";
 import React from "react";
-import { View, Text, Image, FlatList, StyleSheet } from "react-native";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
 export default function ReceiptScreen() {
-  // Exemple de données produits
-  const products = [
-    {
-      id: "1",
-      name: "Produit A",
-      quantity: 2,
-      price: 1500,
-      image: "https://via.placeholder.com/60",
-    },
-    {
-      id: "2",
-      name: "Produit B",
-      quantity: 1,
-      price: 2000,
-      image: "https://via.placeholder.com/60",
-    },
-  ];
+  const { lastOrder, selectedPaymentMethodId } = useOrder();
 
-  // Calcul du total
-  const subtotal = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  const discount = 500;
-  const total = subtotal - discount;
+  if (!lastOrder) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.sectionTitle}>Aucune commande</Text>
+        <Text>Aucune commande récente n'a été trouvée.</Text>
+      </View>
+    );
+  }
+
+  const products = lastOrder.items;
+  const subtotal = lastOrder.subtotal;
+  const discount = lastOrder.discount;
+  const total = lastOrder.total;
+
+  const paymentLabel = lastOrder.paymentMethodId === 'flooz' ? 'Flooz' : lastOrder.paymentMethodId === 'mixx' ? 'Mixx by Yas' : '—';
 
   return (
     <View style={styles.container}>
@@ -31,10 +27,18 @@ export default function ReceiptScreen() {
       <Text style={styles.sectionTitle}>Produits achetés</Text>
       <FlatList
         data={products}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <View style={styles.productRow}>
-            <Image source={{ uri: item.image }} style={styles.productImage} />
+            {item.image ? (
+              typeof item.image === 'string' ? (
+                <Image source={{ uri: item.image }} style={styles.productImage} />
+              ) : (
+                <Image source={item.image} style={styles.productImage} />
+              )
+            ) : (
+              <View style={[styles.productImage, { backgroundColor: '#eee' }]} />
+            )}
             <View style={{ flex: 1 }}>
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productQty}>Quantité : {item.quantity}</Text>
@@ -66,8 +70,7 @@ export default function ReceiptScreen() {
       {/* Moyen de paiement */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Moyen de paiement</Text>
-        <Text style={styles.paymentMethod}>Flooz</Text>
-        {/* si c'est TMoney mettre "TMoney" */}
+        <Text style={styles.paymentMethod}>{paymentLabel}</Text>
       </View>
     </View>
   );
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 0,
-    paddingVertical: 10,
+    paddingVertical: 60,
   },
   sectionTitle: {
     fontSize: 18,
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    paddingBottom: 8,
+    paddingBottom: 18,
   },
   productImage: {
     width: 60,

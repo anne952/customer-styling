@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React from 'react';
-import { Text, View, Image } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useUser } from './user-context';
 
 
@@ -13,7 +13,16 @@ export default function SideMenu() {
       className={`fixed mt-20   p-4`}
     >
       <View className='flex items-center '>
-      <Image source={{ uri: "https://via.placeholder.com/150" }} className="w-16 h-16 rounded-full border-2 border-blue-500 mt-2 ml-2" />
+      <View className="relative">
+        <Pressable accessibilityRole="imagebutton" onPress={() => { /* navigation handled by Link below */ }}>
+          <Image source={user.photoUri ? { uri: user.photoUri } : { uri: "https://via.placeholder.com/150" }} className="photo de profil w-16 h-16 rounded-full border-2 border-blue-500 mt-2 ml-2" />
+        </Pressable>
+        <Link href="/pages/menu/edit" asChild>
+          <Pressable className="absolute right-0 -bottom-1 bg-blue-500 w-6 h-6 rounded-full items-center justify-center">
+            <Ionicons name="pencil" size={12} color="white" />
+          </Pressable>
+        </Link>
+      </View>
 
       {/* Infos utilisateur */}
       <View className="mt-4">
@@ -33,10 +42,10 @@ export default function SideMenu() {
         </Link>
 
 
-        <Link href="/pages/menu/cart">
+        <Link href="/pages/menu/historique">
           <View className="flex flex-row items-center gap-2">
             <Ionicons name="reload-outline" size={20} color="black" />
-            <Text className="text-lg">Cart</Text>
+            <Text className="text-lg">Historique</Text>
           </View>
         </Link>
 

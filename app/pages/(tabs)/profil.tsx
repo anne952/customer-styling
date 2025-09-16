@@ -1,10 +1,11 @@
-import React from "react";
 import SideMenu from "@/components/menu";
-import { View } from "react-native";
-import Nav from "@/components/nav";
+import { useUser } from "@/components/user-context";
+import React from "react";
+import { Image, View } from "react-native";
 
 
 export default function Profil(){
+    const { user } = useUser();
     return (
         <View className="flex-1">
           <SideMenu/>  

@@ -1,13 +1,7 @@
+import { useOrder } from '@/components/order-context';
+import { Link } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { Link } from 'expo-router';
-
-const commande = {
-  image: require('../../../assets/images/1.png'), // Remplacez par le chemin réel
-  nom: 'Chemise blanche',
-  quantite: 2,
-  etape: 1, // 0: Validation, 1: En cours de livraison, 2: Livrée
-};
 
 const etapes = [
   'Validation',
@@ -16,14 +10,37 @@ const etapes = [
 ];
 
 export default function SuivreCommande() {
+  const { lastOrder } = useOrder();
+
+  if (!lastOrder) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titre}>Suivi de la commande</Text>
+        <Text>Aucune commande en cours.</Text>
+      </View>
+    );
+  }
+
+  const first = lastOrder.items[0];
+  const totalQty = lastOrder.items.reduce((s, it) => s + it.quantity, 0);
+  const currentStep = 1; // Exemple: après paiement, "En cours"
+
   return (
     <View style={styles.container}>
       <Text style={styles.titre}>Suivi de la commande</Text>
       <Link href="/pages/transaction/recu" style={styles.card}>
-        <Image source={commande.image} style={styles.image} />
+        {first?.image ? (
+          typeof first.image === 'string' ? (
+            <Image source={{ uri: first.image }} style={styles.image} />
+          ) : (
+            <Image source={first.image} style={styles.image} />
+          )
+        ) : (
+          <View style={[styles.image, { backgroundColor: '#eee' }]} />
+        )}
         <View style={styles.info}>
-          <Text style={styles.nom}>{commande.nom}</Text>
-          <Text style={styles.quantite}>Quantité : {commande.quantite}</Text>
+          <Text style={styles.nom}>{first?.name ?? 'Commande'}</Text>
+          <Text style={styles.quantite}>Quantité totale : {totalQty}</Text>
         </View>
       </Link>
       
@@ -31,9 +48,9 @@ export default function SuivreCommande() {
         {etapes.map((etape, index) => (
           <View key={etape} style={styles.etapeItem}>
             <View
-              style={[styles.circle, index <= commande.etape ? styles.active : styles.inactive]}
+              style={[styles.circle, index <= currentStep ? styles.active : styles.inactive]}
             />
-            <Text style={index <= commande.etape ? styles.activeText : styles.inactiveText}>{etape}</Text>
+            <Text style={index <= currentStep ? styles.activeText : styles.inactiveText}>{etape}</Text>
             {index < etapes.length - 1 && <View style={styles.line} />}
           </View>
         ))}

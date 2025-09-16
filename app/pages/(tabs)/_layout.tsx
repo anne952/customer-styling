@@ -35,12 +35,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="historique"
+        name="cart"
         options={{
-          title: 'Historique',
+          title: 'Panier',
           tabBarIcon: ({ color, size, focused }) => (
             <PressableIcon
-              name={focused ? 'time' : 'time-outline'}
+              name={focused ? 'cart' : 'cart-outline'}
               size={size}
               activeColor={color}
               inactiveColor={color}

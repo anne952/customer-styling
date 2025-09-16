@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 type User = {
 	name: string;
 	email: string;
+	photoUri?: string;
 };
 
 type UserContextValue = {
@@ -13,6 +14,7 @@ type UserContextValue = {
 const defaultUser: User = {
 	name: "Amaka",
 	email: "Amaka@gmail.com",
+	photoUri: undefined,
 };
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);

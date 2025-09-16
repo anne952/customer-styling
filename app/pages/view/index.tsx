@@ -180,7 +180,7 @@ export default function Vu(){
                         size: selectedSize,
                         color: selectedColor,
                       });
-                      router.push("/pages/menu/cart");
+                      router.push("/pages/(tabs)/cart");
                     }}
                     className="bg-blue-500 p-4 rounded-xl w-full -mt-52"
                   >

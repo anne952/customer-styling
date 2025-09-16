@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { useCart } from "@/components/cart-context";
+import { useOrder } from "@/components/order-context";
 import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type PaymentMethod = {
   id: string;
@@ -11,16 +13,33 @@ type PaymentMethod = {
 
 export default function ChoosePaymentScreen() {
   const [selected, setSelected] = useState<string | null>(null);
+  const { setSelectedPaymentMethod } = useOrder();
+  const { totalCount } = useCart();
 
   const paymentMethods: PaymentMethod[] = [
     { id: "flooz", name: "Flooz", image: "https://via.placeholder.com/60" },
     { id: "mixx", name: "Mixx by Yas", image: "https://via.placeholder.com/60" },
   ];
 
+  if (totalCount === 0) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]} className="mt-16">
+        <Link href="/pages/(tabs)/cart" style={styles.backLink}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </Link>
+        <Text style={[styles.title, { marginBottom: 10 }]}>Votre panier est vide</Text>
+        <Text style={{ textAlign: 'center', marginBottom: 20 }}>Ajoutez des articles au panier avant de procéder au paiement.</Text>
+        <Link href="/pages/(tabs)/cart" style={styles.button}>
+          <Text style={styles.buttonText}>Aller au panier</Text>
+        </Link>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container} className="mt-16">
       {/* Bouton retour */}
-      <Link href="/pages/menu/cart" style={styles.backLink}>
+      <Link href="/pages/(tabs)/cart" style={styles.backLink}>
         <Ionicons name="arrow-back" size={24} color="#333" />
       </Link>
 
@@ -32,7 +51,7 @@ export default function ChoosePaymentScreen() {
         <TouchableOpacity
           key={method.id}
           style={styles.paymentRow}
-          onPress={() => setSelected(method.id)}
+          onPress={() => { setSelected(method.id); setSelectedPaymentMethod(method.id); }}
         >
           <Image source={{ uri: method.image }} style={styles.paymentImage} />
           <Text style={styles.paymentName}>{method.name}</Text>
@@ -95,4 +114,4 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" , textAlign:"center"},
-});
+})

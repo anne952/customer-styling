@@ -1,18 +1,23 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { useCart } from "@/components/cart-context";
+import { useOrder } from "@/components/order-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
-
-
-
+import { Link, useRouter } from "expo-router";
+import React, { useState } from "react";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function PaymentCodeScreen() {
   const [pin, setPin] = useState("");
+  const router = useRouter();
+  const { items, clearCart, totalCount } = useCart();
+  const { placeOrder } = useOrder();
 
   const handleContinue = () => {
-    // Ici tu peux valider ou envoyer le code PIN
-    console.log("Code PIN saisi:", pin);
-  
+    if (totalCount === 0) {
+      return; // Ne rien faire si panier vide
+    }
+    placeOrder({ items, discount: 0 });
+    clearCart();
+    router.push("/pages/transaction/payement-succes");
   };
 
   return (
@@ -29,6 +34,10 @@ export default function PaymentCodeScreen() {
       {/* Texte instruction */}
       <Text style={styles.title}>Entrez votre code PIN</Text>
 
+      {totalCount === 0 && (
+        <Text style={{ textAlign: 'center', color: '#c00', marginBottom: 10 }}>Panier vide: retournez au panier pour ajouter des articles.</Text>
+      )}
+
       {/* Input PIN */}
       <TextInput
         style={styles.input}
@@ -41,11 +50,9 @@ export default function PaymentCodeScreen() {
       />
 
       {/* Bouton continuer */}
-      <Link href="/pages/transaction/payement-succes" style={styles.button}>
-      <TouchableOpacity  onPress={handleContinue}>
+      <TouchableOpacity style={[styles.button, totalCount === 0 && { backgroundColor: '#ccc' }]} onPress={handleContinue} disabled={totalCount === 0}>
         <Text style={styles.buttonText} className="text-center">Continuer</Text>
-      </TouchableOpacity>      
-      </Link>
+      </TouchableOpacity>
 
     </View>
   );

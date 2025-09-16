@@ -10,6 +10,7 @@ export default function OnboardingUn() {
         <Image
           source={require("../../../assets/images/1.png")}
           className="w-62 -mt-20 object-contain"
+          resizeMode="contain"
         />
         <View className="mt-24">
         <Text className="text-center font-bold text-md">Pacourez des vêtements sur</Text>
