@@ -33,9 +33,9 @@ export default function SideMenu() {
 
       
       {/* Liens du menu */}
-      <View className="flex mt-20 gap-10 p-6">
+      <View className="flex mt-20 gap-5 p-6">
         <Link href="/pages/menu/edit">
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
             <Ionicons name="pencil" size={20} color="black" />
             <Text className="text-lg">Modifier Profil</Text>
           </View>
@@ -43,7 +43,7 @@ export default function SideMenu() {
 
 
         <Link href="/pages/menu/historique">
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
             <Ionicons name="reload-outline" size={20} color="black" />
             <Text className="text-lg">Historique</Text>
           </View>
@@ -51,7 +51,7 @@ export default function SideMenu() {
 
 
         <Link href="/pages/transaction/suvre-commande">
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
             <Ionicons name="cube-outline" size={20} color="black" />
             <Text className="text-lg">Suivre la commande</Text>
           </View>
@@ -59,21 +59,21 @@ export default function SideMenu() {
 
 
         <Link href="/pages/menu/help">
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
             <Ionicons name="help" size={20} color="black" />
             <Text className="text-lg">Aide</Text>
           </View>
         </Link>
 
         <Link href="/pages/menu/parametre">
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
             <Ionicons name="settings" size={20} color="black" />
             <Text className="text-lg">Paramètre</Text>
           </View>
         </Link>
 
-        <Link href="/pages/connexion/login">
-          <View className="flex flex-row items-center gap-2">
+        <Link href="/">
+          <View className="flex flex-row items-center gap-2 bg-gray-400 p-2 rounded-lg w-96">
             <Ionicons name="arrow-back" size={20} color="black" />
             <Text className="text-lg">Déconnecté</Text>
           </View>

@@ -16,7 +16,7 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-gray-100">
        <View className="flex-row justify-center items-center -mt-10">
-        <Image source={require("../../../assets/images/Stylings.png")} style={{width: 80 ,marginTop: 90, height: 40, resizeMode: "contain"}} />
+        <Image source={require("../../../assets/fonts/mini logo.png")} style={{width: 80 ,marginTop: 90, height: 40, resizeMode: "contain"}} />
       </View>
       <ScrollView>
 

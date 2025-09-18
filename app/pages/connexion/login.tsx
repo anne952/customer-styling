@@ -47,24 +47,6 @@ export default function Login() {
       
       
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 20, paddingHorizontal: 24, paddingTop: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-          <Text style={{ marginHorizontal: 8, fontWeight: 'bold' }}>ou</Text>
-          <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-        </View>
-
-        <View className="flex-row justify-center mt-4">
-          <View className="bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
-            <Ionicons name="logo-google" size={24} color="black" />
-          </View>
-          <View className="bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
-            <Ionicons name="logo-facebook" size={24} color="black" />
-          </View>
-          <View className="bg-white w-12 shadow-slate-400 shadow-md rounded-lg p-3 items-center justify-center mx-4">
-            <Ionicons name="logo-apple" size={24} color="black" />
-          </View>
-        </View>
-
         <Link href="/pages/connexion/forget-password" className="text-center w-full mt-4 text-blue-500 font-semibold">
           Mot de passe oublié ?
         </Link>

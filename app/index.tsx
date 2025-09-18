@@ -16,7 +16,7 @@ export default function SplashScreen() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#606FEF" }}>
       <Image
-        source={require("../assets/images/STYLING.png")}
+        source={require("../assets/fonts/logo.png")}
        style={{width: 180 , height: 260, resizeMode: "contain"}}
       />
     </View>

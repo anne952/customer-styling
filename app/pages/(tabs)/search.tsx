@@ -1,4 +1,5 @@
 import CartProduits from "@/constant/cartProduit";
+import Vendors from "@/constant/vendors";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -14,10 +15,16 @@ import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View } f
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
 
-  const results = useMemo(() => {
+  const productResults = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return CartProduits;
     return CartProduits.filter((p) => p.name?.toLowerCase().includes(q));
+  }, [query]);
+
+  const vendorResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return Vendors;
+    return Vendors.filter((v) => v.name.toLowerCase().includes(q) || v.email.toLowerCase().includes(q));
   }, [query]);
 
   return (
@@ -55,7 +62,7 @@ export default function SearchScreen() {
             paddingVertical: 8,
             paddingHorizontal: 8,
           }}
-          placeholder="Rechercher..."
+          placeholder="Rechercher produit ou vendeur..."
           value={query}
           onChangeText={setQuery}
           autoCorrect={false}
@@ -70,14 +77,48 @@ export default function SearchScreen() {
         )}
       </View>
 
-      {/* Résultats */}
+            {/* Section Vendeurs */}
       <FlatList
-        data={results}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 }}
+        data={vendorResults}
+        keyExtractor={(item) => `v-${item.id}`}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        ListHeaderComponent={() => (
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 16 }}>Vendeurs</Text>
+        )}
         ListEmptyComponent={() => (
-          <View style={{ padding: 24 }}>
-            <Text>Aucun résultat</Text>
+          <View style={{ paddingVertical: 12 }}>
+            <Text>Aucun vendeur trouvé</Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <Link href={{ pathname: "/pages/vendeur/profil", params: { id: item.id } }} asChild>
+            <Pressable style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}>
+              {item.avatar ? (
+                <Image source={{ uri: item.avatar }} style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }} />
+              ) : (
+                <View style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12, backgroundColor: '#ddd' }} />
+              )}
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
+                <Text style={{ color: '#666' }}>{item.email}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#888" />
+            </Pressable>
+          </Link>
+        )}
+      />
+
+      {/* Section Produits */}
+      <FlatList
+        data={productResults}
+        keyExtractor={(item) => `p-${item.id}`}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        ListHeaderComponent={() => (
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 16 }}>Produits</Text>
+        )}
+        ListEmptyComponent={() => (
+          <View style={{ paddingVertical: 12 }}>
+            <Text>Aucun produit trouvé</Text>
           </View>
         )}
         renderItem={({ item }) => (
@@ -103,6 +144,8 @@ export default function SearchScreen() {
           </Link>
         )}
       />
+
+
       
       <View className="absolute bottom-0 w-full">
       </View>

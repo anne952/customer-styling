@@ -12,7 +12,7 @@ export default function Nav(){
                     <Ionicons name="home" size={30} color="white" />
                 </View>
                 </Link>
-                <Link href="/pages/menu/cart" >
+                <Link href="/pages/(tabs)/cart" >
                 <View>
                     <Ionicons name="cart-outline" size={30} color="white" />
                 </View>
