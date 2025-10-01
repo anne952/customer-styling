@@ -1,5 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { CartItem } from "./cart-context";
+import { notifyOrderAccepted, notifyOrderDelivered } from "./notifications";
+
+export type OrderStatus = 'pending' | 'accepted' | 'out_for_delivery' | 'delivered_vendor' | 'delivered_confirmed' | 'delivery_disputed';
 
 export type OrderLine = {
 	id: number;
@@ -17,13 +20,16 @@ export type PlacedOrder = {
 	discount: number;
 	total: number;
 	paymentMethodId: string | null;
+	status: OrderStatus;
 };
 
 type OrderContextValue = {
 	selectedPaymentMethodId: string | null;
 	setSelectedPaymentMethod: (id: string | null) => void;
 	lastOrder: PlacedOrder | null;
+	orders: PlacedOrder[];
 	placeOrder: (params: { items: CartItem[]; discount?: number }) => PlacedOrder;
+	setOrderStatus: (orderId: string, status: OrderStatus) => void;
 };
 
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
@@ -31,6 +37,7 @@ const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 	const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | null>(null);
 	const [lastOrder, setLastOrder] = useState<PlacedOrder | null>(null);
+	const [orders, setOrders] = useState<PlacedOrder[]>([]);
 
 	const setSelectedPaymentMethod = useCallback((id: string | null) => {
 		setSelectedPaymentMethodId(id);
@@ -48,12 +55,21 @@ export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 			discount,
 			total,
 			paymentMethodId: selectedPaymentMethodId,
+			status: 'pending',
 		};
 		setLastOrder(order);
+		setOrders((prev) => [order, ...prev]);
 		return order;
 	}, [selectedPaymentMethodId]);
 
-	const value = useMemo(() => ({ selectedPaymentMethodId, setSelectedPaymentMethod, lastOrder, placeOrder }), [selectedPaymentMethodId, setSelectedPaymentMethod, lastOrder, placeOrder]);
+	const setOrderStatus: OrderContextValue["setOrderStatus"] = useCallback((orderId, status) => {
+		setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status } : o)));
+		setLastOrder((prev) => (prev && prev.id === orderId ? { ...prev, status } : prev));
+		if (status === 'accepted') notifyOrderAccepted(orderId);
+		if (status === 'delivered_vendor') notifyOrderDelivered(orderId);
+	}, []);
+
+	const value = useMemo(() => ({ selectedPaymentMethodId, setSelectedPaymentMethod, lastOrder, orders, placeOrder, setOrderStatus }), [selectedPaymentMethodId, setSelectedPaymentMethod, lastOrder, orders, placeOrder, setOrderStatus]);
 
 	return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };

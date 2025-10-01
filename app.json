@@ -25,8 +25,16 @@
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [
-        "android.permission.READ_MEDIA_IMAGES"
-      ]
+        "android.permission.READ_MEDIA_IMAGES",
+        "com.google.android.c2dm.permission.RECEIVE"
+      ],
+      "notification": {
+        "icon": "./assets/images/icon.png",
+        "color": "#606FEF",
+        "defaults": ["vibrate"],
+        "mode": "default",
+        "collapsedTitle": "Styling"
+      }
     },
     "web": {
       "bundler": "metro",

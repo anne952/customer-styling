@@ -1,13 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Alert, BackHandler, Image, Platform, Pressable, Text, View } from 'react-native';
 import { useUser } from './user-context';
 
 
 
 export default function SideMenu() {
   const { user } = useUser();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Se déconnecter',
+      "Voulez-vous vous déconnecter ?",
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'OK',
+          style: 'destructive',
+          onPress: () => {
+            router.replace('/pages/connexion/login');
+            if (Platform.OS === 'android') {
+              setTimeout(() => BackHandler.exitApp(), 200);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View
       className={`fixed mt-20   p-4`}
@@ -33,9 +55,9 @@ export default function SideMenu() {
 
       
       {/* Liens du menu */}
-      <View className="flex mt-20 gap-5 p-6">
+      <View className="flex mt-20 gap-10 p-6">
         <Link href="/pages/menu/edit">
-          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="pencil" size={20} color="black" />
             <Text className="text-lg">Modifier Profil</Text>
           </View>
@@ -43,7 +65,7 @@ export default function SideMenu() {
 
 
         <Link href="/pages/menu/historique">
-          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="reload-outline" size={20} color="black" />
             <Text className="text-lg">Historique</Text>
           </View>
@@ -51,7 +73,7 @@ export default function SideMenu() {
 
 
         <Link href="/pages/transaction/suvre-commande">
-          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="cube-outline" size={20} color="black" />
             <Text className="text-lg">Suivre la commande</Text>
           </View>
@@ -59,25 +81,25 @@ export default function SideMenu() {
 
 
         <Link href="/pages/menu/help">
-          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="help" size={20} color="black" />
             <Text className="text-lg">Aide</Text>
           </View>
         </Link>
 
         <Link href="/pages/menu/parametre">
-          <View className="flex flex-row items-center gap-2 bg-slate-400 p-2 rounded-lg w-96">
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="settings" size={20} color="black" />
             <Text className="text-lg">Paramètre</Text>
           </View>
         </Link>
 
-        <Link href="/">
-          <View className="flex flex-row items-center gap-2 bg-gray-400 p-2 rounded-lg w-96">
+        <Pressable onPress={handleLogout}>
+          <View className="flex flex-row items-center gap-2">
             <Ionicons name="arrow-back" size={20} color="black" />
-            <Text className="text-lg">Déconnecté</Text>
+            <Text className="text-lg">Se déconnecter</Text>
           </View>
-        </Link>
+        </Pressable>
       </View>
     </View>
   );
