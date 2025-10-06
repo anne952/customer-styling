@@ -1,9 +1,12 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { Product } from "../utils/produit";
 
 export type CartItem = {
-	 id: number;
+	 produitId: number; // ID réel du produit depuis l'API
+	 id: number; // Pour compatibilité avec l'ancien système
 	 name: string;
 	 price: number;
+	 product?: Product; // Référence au produit complet depuis l'API
 	 image?: any;
 	 size?: string | null;
 	 color?: string | null;
@@ -35,7 +38,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 	 );
 
 	 const addToCart: CartContextValue["addToCart"] = useCallback(
-		 ({ id, name, price, image, size = null, color = null, quantity = 1 }) => {
+		 ({ id, produitId, name, price, image, size = null, color = null, quantity = 1, product }) => {
 			 setItems((prev) => {
 				 const idx = prev.findIndex(
 					 (it) => it.id === id && (it.size ?? null) === (size ?? null) && (it.color ?? null) === (color ?? null)
@@ -45,7 +48,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 					 next[idx] = { ...next[idx], quantity: next[idx].quantity + quantity };
 					 return next;
 				 }
-				 return [...prev, { id, name, price, image, size, color, quantity }];
+				 return [...prev, { id, produitId: produitId || id, name, price, image, size, color, quantity, product }];
 			 });
 		 },
 		 []
@@ -100,5 +103,3 @@ export const useCart = () => {
 	 if (!ctx) throw new Error("useCart must be used within CartProvider");
 	 return ctx;
 };
-
-

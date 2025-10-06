@@ -1,9 +1,11 @@
-import CartProduits from "@/constant/cartProduit";
-import Vendors from "@/constant/vendors";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { searchProducts } from "../../../utils/produit";
+import { searchUsers } from "../../../utils/users";
+import { Product } from "../../../utils/produit";
+import { User } from "../../../utils/users";
 
 
 
@@ -14,20 +16,61 @@ import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View } f
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
+  const [productResults, setProductResults] = useState<Product[]>([]);
+  const [vendorResults, setVendorResults] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const q = query.trim().toLowerCase();
+  const handleSearch = async (searchQuery: string) => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setProductResults([]);
+      setVendorResults([]);
+      setHasSearched(false);
+      return;
+    }
 
-  const productResults = useMemo(() => {
-    if (!q) return [] as typeof CartProduits;
-    return CartProduits.filter((p) => p.name?.toLowerCase().includes(q));
-  }, [q]);
+    setLoading(true);
+    setHasSearched(true);
 
-  const vendorResults = useMemo(() => {
-    if (!q) return [] as typeof Vendors;
-    return Vendors.filter((v) => v.name.toLowerCase().includes(q) || v.email.toLowerCase().includes(q));
-  }, [q]);
+    try {
+      // Recherche en parallèle
+      const [products, vendors] = await Promise.all([
+        searchProducts(q).catch(err => {
+          console.warn('Erreur recherche produits:', err);
+          return [];
+        }),
+        searchUsers(q).catch(err => {
+          console.warn('Erreur recherche vendeurs:', err);
+          return [];
+        })
+      ]);
 
-  const showResults = q.length > 0;
+      setProductResults(products);
+      setVendorResults(vendors);
+    } catch (error) {
+      console.error('Erreur lors de la recherche:', error);
+      setProductResults([]);
+      setVendorResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debounce pour la recherche
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch(query);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  const handleSubmitSearch = () => {
+    handleSearch(query);
+  };
+
+  const showResults = hasSearched;
 
   return (
     <View
@@ -100,28 +143,28 @@ export default function SearchScreen() {
               <Text>Aucun produit trouvé</Text>
             </View>
           )}
-          renderItem={({ item }) => (
-            <Link href={{ pathname: "/pages/view", params: { id: String(item.id) } }} asChild>
-              <Pressable style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}>
-                {item.image ? (
-                  typeof item.image === 'string' ? (
-                    <Image source={{ uri: item.image }} style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }} />
+          renderItem={({ item }) => {
+            const mainImage = item.productImages && item.productImages.length > 0
+              ? item.productImages[0].url
+              : null;
+
+            return (
+              <Link href={{ pathname: "/pages/view", params: { id: String(item.id), productData: JSON.stringify(item) } }} asChild>
+                <Pressable style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}>
+                  {mainImage ? (
+                    <Image source={{ uri: mainImage }} style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }} />
                   ) : (
-                    <Image source={item.image} style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }} />
-                  )
-                ) : (
-                  <View style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12, backgroundColor: '#eee' }} />
-                )}
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: "600" }}>{item.name}</Text>
-                  {typeof item.Prix !== 'undefined' && (
-                    <Text style={{ color: '#606FEF', marginTop: 2 }}>{item.Prix} FCFA</Text>
+                    <View style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12, backgroundColor: '#eee' }} />
                   )}
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#888" />
-              </Pressable>
-            </Link>
-          )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 16, fontWeight: "600" }}>{item.nom}</Text>
+                    <Text style={{ color: '#606FEF', marginTop: 2 }}>{item.prix} FCFA</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#888" />
+                </Pressable>
+              </Link>
+            );
+          }}
         />
       )}
 
@@ -140,15 +183,15 @@ export default function SearchScreen() {
             </View>
           )}
           renderItem={({ item }) => (
-            <Link href={{ pathname: "/pages/vendeur/profil", params: { id: item.id } }} asChild>
+            <Link href={{ pathname: "/pages/vendeur/profil", params: { vendeurId: item.id.toString(), vendeurData: JSON.stringify(item) } }} asChild>
               <Pressable style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}>
-                {item.avatar ? (
-                  <Image source={{ uri: item.avatar }} style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }} />
+                {item.photoProfil ? (
+                  <Image source={{ uri: item.photoProfil }} style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }} />
                 ) : (
                   <View style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12, backgroundColor: '#ddd' }} />
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.nom}</Text>
                   <Text style={{ color: '#666' }}>{item.email}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#888" />

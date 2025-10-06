@@ -1,10 +1,10 @@
 import { useCart } from "@/components/cart-context";
 import { useLikes } from "@/components/likes-context";
-import CartProduits from "@/constant/cartProduit";
+import { getProductById } from "@/utils/api";
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 
 export default function Vu(){
   const params = useLocalSearchParams();
@@ -13,31 +13,110 @@ export default function Vu(){
   const router = useRouter();
   const idParam = Array.isArray(params.id) ? params.id[0] : params.id;
   const idNumeric = idParam ? Number(idParam) : undefined;
+  // Support preloaded productData passed via navigation to avoid refetch
+  const productDataParam = Array.isArray(params.productData) ? params.productData[0] : (params as any).productData;
 
-  const produitsArray = (CartProduits as unknown) as any[];
-  const produit = idNumeric ? produitsArray.find((p) => p?.id === idNumeric) : undefined;
+  const [produit, setProduit] = useState<any>(() => {
+    if (productDataParam) {
+      try {
+        return JSON.parse(String(productDataParam));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [vendeur, setVendeur] = useState<any>(null);
+  const [loading, setLoading] = useState(!Boolean(productDataParam));
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const produitName = produit?.name ?? (Array.isArray(params.name) ? params.name[0] : (params.name as string)) ?? "";
-  const produitPrix = (produit?.Prix ?? Number(Array.isArray(params.prix) ? params.prix[0] : (params.prix as string))) ?? 0;
-  const prixPromoParam = Array.isArray(params.prixPromo) ? params.prixPromo[0] : (params.prixPromo as string | undefined);
-  const produitPrixPromo = produit?.prixPromo ?? (prixPromoParam !== undefined ? Number(prixPromoParam) : undefined);
+  useEffect(() => {
+    if (produit) return; // Already have data from navigation
+    if (!idNumeric) {
+      setLoading(false);
+      setLoadError("Identifiant produit manquant");
+      return;
+    }
+
+    const loadProduct = async () => {
+      try {
+        const productData = await getProductById(idNumeric);
+        setProduit(productData);
+      } catch (error: any) {
+        console.error('Erreur chargement produit:', error);
+        setLoadError(error?.message || 'Erreur de chargement');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [idNumeric]);
+
+  // Extract seller data when product is available
+  useEffect(() => {
+    // Add a small delay to ensure product data is fully loaded
+    if (!produit) return;
+
+    // Extract vendor info from product data (included by backend)
+    // Check multiple possible data structures
+    let sellerInfo = null;
+    if (produit.vendeur) {
+      sellerInfo = produit.vendeur;
+    } else if (produit.vendeurData) {
+      sellerInfo = produit.vendeurData;
+    }
+
+    if (sellerInfo) {
+      setVendeur(sellerInfo);
+    }
+  }, [produit]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 mt-16 p-6 items-center justify-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="mt-4 text-gray-500">Chargement du produit...</Text>
+      </View>
+    );
+  }
+
+  if (!produit) {
+    return (
+      <View className="flex-1 mt-16 p-6 items-center justify-center">
+        <Text className="text-red-500">{loadError || 'Produit introuvable'}</Text>
+      </View>
+    );
+  }
+
+  const produitName = produit.nom;
+  const produitPrix = Number(produit.prix);
+  const produitPrixPromo = produit.prixPromotion ? Number(produit.prixPromotion) : undefined;
 
   const discountPercent = typeof produitPrixPromo !== "undefined" && produitPrixPromo > 0
     ? Math.max(0, Math.round(((produitPrixPromo - produitPrix) / produitPrix) * -100))
     : undefined;
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const sizes = ["S", "M", "XL"];
+  // Get sizes from the tailles relationship (multiple sizes) or fallback to single taille
+  const sizes = produit?.tailles?.length > 0
+    ? produit.tailles.map((t: any) => t.taille)
+    : produit?.taille ? [produit.taille] : [];
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const colors = [
-    { key: "black", className: "bg-black" },
-    { key: "slate-500", className: "bg-slate-500" },
-    { key: "blue-400", className: "bg-blue-400" },
-  ];
 
-  const images: any[] = (produit?.images && Array.isArray(produit.images) && produit.images.length > 0)
-    ? produit.images.slice(0, 5)
-    : (produit?.image ? [produit.image] : []);
+  // Set defaults when product loads
+  useEffect(() => {
+    if (sizes.length > 0 && !selectedSize) setSelectedSize(sizes[0]);
+    if (produit?.couleurs?.length > 0 && !selectedColor) setSelectedColor(produit.couleurs[0].couleur.nom);
+  }, [produit, sizes]);
+  const colors = produit?.couleurs?.map((c: any) => ({
+    key: c.couleur.nom,
+    hex: c.couleur.hex || '#9ca3af' // default gray if no hex
+  })) || [];
+
+  const images: any[] = (produit?.productImages && Array.isArray(produit.productImages) && produit.productImages.length > 0)
+    ? produit.productImages.slice(0, 5).map((img: any) => ({ uri: img.url }))
+    : [];
 
   const [carouselWidth, setCarouselWidth] = useState<number>(0);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -127,12 +206,7 @@ export default function Vu(){
           showsVerticalScrollIndicator={true}
           contentContainerStyle={{ paddingBottom: 24 }}
         >
-          {/* Nom du vendeur */}
-          <View className="px-1 pt-5">
-            <Link href="/pages/vendeur/profil">
-              <Text className="text-lg font-semibold text-gray-500">Shooda fashion</Text>
-            </Link>
-          </View>
+
           
           {/* Nom et prix du produit */}
           <View className="px-1 pt-2 flex flex-row justify-between items-start">
@@ -166,7 +240,7 @@ export default function Vu(){
           {/* Sélection de taille */}
           <View className="mt-4">
             <View className="flex flex-row justify-center p-4 gap-3">
-              {sizes.map((size) => {
+              {sizes.map((size: string) => {
                 const isSelected = selectedSize === size;
                 const containerClass = isSelected ? "bg-blue-600 border border-blue-600" : "bg-white border border-gray-300";
                 const textClass = isSelected ? "text-white" : "text-gray-800";
@@ -185,7 +259,7 @@ export default function Vu(){
             
             {/* Sélection de couleur */}
             <View className="px-6 py-2 flex flex-row gap-4 justify-center">
-              {colors.map((c) => {
+              {colors.map((c: {key: string, hex: string}) => {
                 const isSelected = selectedColor === c.key;
                 return (
                   <Pressable
@@ -194,7 +268,7 @@ export default function Vu(){
                     onPress={() => setSelectedColor(c.key)}
                     className={`w-10 h-10 rounded-full items-center justify-center ${isSelected ? "border-2 border-blue-600" : "border border-gray-300"}`}
                   >
-                    <View className={`w-8 h-8 rounded-full ${c.className}`} />
+                    <View className="w-8 h-8 rounded-full" style={{ backgroundColor: c.hex }} />
                   </Pressable>
                 );
               })}
@@ -203,10 +277,32 @@ export default function Vu(){
             {/* Description du produit */}
             <View className="px-4 mt-2">
               <Text className="text-base leading-6 text-gray-700">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente magnam nam cumque non, odit magni consequatur, sed expedita enim esse quo minus illum, veniam vitae aspernatur rerum autem beatae blanditiis.
+                {produit.description || 'Aucune description disponible.'}
               </Text>
             </View>
-            
+
+            {/* Informations sur le vendeur */}
+            {vendeur && (
+              <View className="px-4 mt-4">
+                <Text className="text-sm text-gray-500 mb-1">Vendu par :</Text>
+                <Pressable
+                  onPress={() => router.push({
+                    pathname: '/pages/vendeur/profil',
+                    params: {
+                      vendeurId: vendeur.id.toString(),
+                      vendeurData: JSON.stringify(vendeur)
+                    }
+                  })}
+                  className="flex-row items-center"
+                >
+                  <Text className="text-blue-600 font-semibold text-base mr-2">
+                    {vendeur.nom}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color="#2563eb" />
+                </Pressable>
+              </View>
+            )}
+
             <View className="h-44"></View>
           </View>
           
@@ -232,9 +328,10 @@ export default function Vu(){
                   if (!produit || !idNumeric) return;
                   addToCart({
                     id: idNumeric,
+                    produitId: produit.id,
                     name: produitName,
                     price: produitPrix,
-                    image: produit.image,
+                    image: images.length > 0 ? images[0] : undefined,
                     size: selectedSize,
                     color: selectedColor,
                   });

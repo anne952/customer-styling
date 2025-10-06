@@ -3,11 +3,12 @@ import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, BackHandler, Image, Platform, Pressable, Text, View } from 'react-native';
 import { useUser } from './user-context';
+import { logout as logoutAPI } from '../utils/users';
 
 
 
 export default function SideMenu() {
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -19,7 +20,13 @@ export default function SideMenu() {
         {
           text: 'OK',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            try {
+              await logoutAPI(); // Logout from backend
+              logout(); // Reset user context
+            } catch (error) {
+              console.error('Logout error:', error);
+            }
             router.replace('/pages/connexion/login');
             if (Platform.OS === 'android') {
               setTimeout(() => BackHandler.exitApp(), 200);
@@ -50,6 +57,12 @@ export default function SideMenu() {
       <View className="mt-4">
         <Text className="text-center font-bold text-lg">{user.name}</Text>
         <Text className="text-center font-semibold text-sm">{user.email}</Text>
+        {user.telephone && (
+          <Text className="text-center text-sm text-gray-600">{user.telephone}</Text>
+        )}
+        {user.localisation && (
+          <Text className="text-center text-sm text-gray-600">{user.localisation}</Text>
+        )}
       </View>
       </View>
 

@@ -1,38 +1,52 @@
-import CartProduits from "@/constant/cartProduit";
-import React, { useMemo, useState } from "react";
-import { Alert, Image, Pressable, SectionList, Text, View } from "react-native";
-
-type OrderItem = {
-  id: string;
-  productId: number;
-  quantity: number;
-  date: string; // ISO date
-};
-
-// Temp data to demonstrate UI; replace with real persisted history later
-const SAMPLE_HISTORY: OrderItem[] = [
-  { id: "o1", productId: 1, quantity: 2, date: new Date().toISOString() },
-  { id: "o2", productId: 2, quantity: 1, date: new Date().toISOString() },
-  { id: "o3", productId: 3, quantity: 3, date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString() },
-  { id: "o4", productId: 1, quantity: 1, date: new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString() },
-];
+import React, { useMemo, useState, useEffect } from "react";
+import { Alert, Image, Pressable, SectionList, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { getMyOrders, Order } from "../../../utils/orders";
+import { Link } from "expo-router";
 
 const monthKey = (iso: string) => {
   const d = new Date(iso);
-  return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(d);
-};
+    return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(d);
+  };
+
+  // Helper to get date safely
+  const getDate = (order: Order) => {
+    return new Date(order.updatedAt || (order as any).date || order.createdAt);
+  };
 
 export default function Historique() {
-  const produitsArray = (CartProduits as unknown) as any[];
-  const [history, setHistory] = useState<OrderItem[]>(SAMPLE_HISTORY);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  const fetchOrders = async () => {
+    try {
+      const fetchedOrders = await getMyOrders();
+      setOrders(fetchedOrders);
+    } catch (error) {
+      console.error('Erreur lors du chargement des commandes:', error);
+      Alert.alert('Erreur', 'Impossible de charger vos commandes');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchOrders();
+  };
 
   const sections = useMemo(() => {
-    const groups = new Map<string, OrderItem[]>();
-    for (const it of history) {
-      const key = monthKey(it.date);
+    const groups = new Map<string, Order[]>();
+    for (const order of orders) {
+      const key = monthKey((order as any).date || order.updatedAt);
       const arr = groups.get(key) ?? [];
-      arr.push(it);
+      arr.push(order);
       groups.set(key, arr);
     }
     // Sort months desc by date
@@ -40,65 +54,87 @@ export default function Historique() {
       // parse year and month using Date from first item in each group
       const aFirst = groups.get(a)![0];
       const bFirst = groups.get(b)![0];
-      return new Date(bFirst.date).getTime() - new Date(aFirst.date).getTime();
+      const aDate = getDate(aFirst);
+      const bDate = getDate(bFirst);
+      return bDate.getTime() - aDate.getTime();
     });
     return sortedKeys.map((title) => ({ title, data: groups.get(title)! }));
-  }, [history]);
+  }, [orders]);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
 
-  const clearAll = () => {
-    Alert.alert("Supprimer tout", "Voulez-vous supprimer tout l'historique ?", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", style: "destructive", onPress: () => {
-        setHistory([]);
-        setSelectedIds(new Set());
-      }},
-    ]);
-  };
-
-  const deleteSelected = () => {
-    if (selectedIds.size === 0) return;
-    Alert.alert("Supprimer sélection", `Supprimer ${selectedIds.size} élément(s) ?`, [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", style: "destructive", onPress: () => {
-        setHistory((prev) => prev.filter((it) => !selectedIds.has(it.id)));
-        setSelectedIds(new Set());
-      }},
-    ]);
-  };
-
-  const renderItem = ({ item }: { item: OrderItem }) => {
-    const produit = produitsArray.find((p) => p?.id === item.productId);
-    if (!produit) return null;
-    const prix: number = produit?.Prix ?? 0;
-    const prixPromo: number | undefined = produit?.prixPromo;
-    const image: any = produit?.image;
-    const isSelected = selectedIds.has(item.id);
+  if (loading) {
     return (
-      <Pressable onPress={() => toggleSelect(item.id)} className={`flex flex-row bg-white rounded-xl p-3 mb-3 items-center ${isSelected ? 'border-2 border-blue-500' : ''}`}>
-        {image && (
-          <Image source={image} style={{ width: 64, height: 64, borderRadius: 8 }} resizeMode="cover" />
-        )}
-        <View className="ml-4 flex-1">
-          <Text className="font-bold text-base">{produit?.name}</Text>
-          {typeof prixPromo !== "undefined" && (
-            <Text className="line-through text-gray-400">{prixPromo} F</Text>
+      <View className="flex-1 bg-gray-100 justify-center items-center">
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text className="mt-2 text-gray-600">Chargement de vos commandes...</Text>
+      </View>
+    );
+  }
+
+  const renderItem = ({ item }: { item: Order }) => {
+    const totalAmount = parseFloat(item.montant);
+    const statusTranslations: { [key: string]: string } = {
+      'en_attente': 'En attente',
+      'en_cours_pour_la_livraison': 'En cours de livraison',
+      'livree': 'Livrée',
+      'annulee': 'Annulée'
+    };
+
+    const statusText = statusTranslations[item.status] || item.status;
+
+    return (
+      <View className="bg-white rounded-xl p-4 mb-3">
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="font-bold text-lg">Commande #{item.id}</Text>
+          <Text className={`px-3 py-1 rounded-full text-sm font-semibold ${
+            item.status === 'livree' ? 'bg-green-100 text-green-800' :
+            item.status === 'annulee' ? 'bg-red-100 text-red-800' :
+            'bg-blue-100 text-blue-800'
+          }`}>
+            {statusText}
+          </Text>
+        </View>
+
+        <View className="mb-2">
+          <Text className="text-gray-600 text-sm">
+            {getDate(item).toLocaleDateString('fr-FR')}
+          </Text>
+          {item.localisation && (
+            <Text className="text-gray-600 text-sm">{item.localisation}</Text>
           )}
-          <Text className="font-semibold">{prix} F</Text>
         </View>
-        <View className="items-end">
-          <Text className="text-sm text-gray-600">Qté</Text>
-          <Text className="text-center font-semibold text-lg">{item.quantity}</Text>
-          <View style={{ width: 18, height: 18, borderRadius: 4, borderWidth: 2, borderColor: isSelected ? '#2563eb' : '#cbd5e1', marginTop: 6, backgroundColor: isSelected ? '#2563eb' : 'transparent' }} />
+
+        <View className="flex-row justify-between items-center">
+          <Text className="font-semibold text-lg">{totalAmount} F</Text>
+          <Text className="text-gray-600">
+            {item.ligneCommande.reduce((total, ligne) => total + ligne.quantite, 0)} article(s)
+          </Text>
         </View>
-      </Pressable>
+
+        <View className="mt-2">
+          <Text className="font-medium mb-1">Articles :</Text>
+          {item.ligneCommande.map((ligne, index) => (
+            <Text key={index} className="text-sm text-gray-600 ml-2">
+              • Quantité: {ligne.quantite} - Prix: {parseFloat(ligne.prixUnitaire)} F
+            </Text>
+          ))}
+        </View>
+
+        {/* Bouton Voir le reçu */}
+        <View className="mt-3 flex-row justify-center">
+          <Link
+            href={{
+              pathname: '/pages/transaction/recu',
+              params: { orderData: JSON.stringify(item) }
+            }}
+            asChild
+          >
+            <Pressable className="bg-blue-600 px-4 py-2 rounded-lg">
+              <Text className="text-white text-sm font-semibold">Voir le reçu</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </View>
     );
   };
 
@@ -109,28 +145,30 @@ export default function Historique() {
   return (
     <View className="flex-1 bg-gray-100 p-4 mt-20">
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-2xl font-extrabold">Historique</Text>
-       <View className="flex-row gap-2">
-          <Pressable onPress={deleteSelected} disabled={selectedIds.size === 0} className={`${selectedIds.size === 0 ? 'bg-gray-300' : 'bg-red-500'} px-3 py-2 rounded-lg`}>
-            <Text className="text-white font-semibold">Supprimer </Text>
-          </Pressable>
-          <Pressable onPress={clearAll} className="px-3 py-2 rounded-lg bg-red-600">
-            <Text className="text-white font-semibold">Tout supprimer</Text>
-          </Pressable>
-        </View>
-
+        <Text className="text-2xl font-extrabold">Historique des commandes</Text>
       </View>
 
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-        stickySectionHeadersEnabled={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      />
+      {orders.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-gray-500 text-lg">Aucune commande trouvée</Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          stickySectionHeadersEnabled={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#3b82f6']}
+            />
+          }
+          contentContainerStyle={{ paddingBottom: 40 }}
+        />
+      )}
     </View>
   );
 }
-
-

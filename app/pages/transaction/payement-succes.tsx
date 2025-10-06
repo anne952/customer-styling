@@ -1,11 +1,20 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
-
-
+import { useRouter } from "expo-router";
 
 export default function PaymentSuccessScreen({ navigation }: any) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Navigation automatique vers le suivi de commande après 2 secondes
+    const timer = setTimeout(() => {
+      router.push("/pages/transaction/suvre-commande");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
     <View style={styles.container}>
       {/* Titre */}
@@ -16,11 +25,8 @@ export default function PaymentSuccessScreen({ navigation }: any) {
         <Ionicons name="checkmark" size={60} color="#fff" />
       </View>
 
-      {/* Bouton suivre la commande */}
-      <Link href="/pages/transaction/suvre-commande" style={styles.button} >
-        <Text style={styles.buttonText}>Suivre la commande</Text>
-
-      </Link>
+      {/* Message de redirection automatique */}
+      <Text style={styles.redirectText}>Redirection vers le suivi de commande...</Text>
     </View>
   );
 }
@@ -58,5 +64,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  redirectText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 20,
   },
 });

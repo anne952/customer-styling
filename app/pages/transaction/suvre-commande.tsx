@@ -1,7 +1,7 @@
-import { useOrder } from '@/components/order-context';
+import React, { useState, useEffect } from 'react';
+import { Alert, FlatList, Text, View, ActivityIndicator, RefreshControl, StyleSheet, Pressable } from 'react-native';
+import { getMyOrders, Order } from '../../../utils/orders';
 import { Link } from 'expo-router';
-import React, { useMemo } from 'react';
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const etapes = [
   'Validation',
@@ -10,16 +10,52 @@ const etapes = [
 ];
 
 export default function SuivreCommande() {
-  const { orders, setOrderStatus } = useOrder();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Orders that are not fully confirmed by client
-  const activeOrders = useMemo(() => orders.filter(o => o.status !== 'delivered_confirmed'), [orders]);
+  const fetchOrders = async () => {
+    try {
+      const fetchedOrders = await getMyOrders();
+      setOrders(fetchedOrders);
+    } catch (error) {
+      console.error('Erreur lors du chargement des commandes:', error);
+      Alert.alert('Erreur', 'Impossible de charger vos commandes');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchOrders();
+  };
+
+  // Filter orders that are not delivered
+  const activeOrders = orders.filter(order => order.status !== 'livree' && order.status !== 'annulee');
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titre}>Suivi de la commande</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={{ marginTop: 10 }}>Chargement de vos commandes...</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (activeOrders.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.titre}>Suivi de la commande</Text>
-        <Text>Aucune commande en cours.</Text>
+        <Text style={{ textAlign: 'center', fontSize: 16, marginTop: 20 }}>Aucune commande en cours.</Text>
       </View>
     );
   }
@@ -29,35 +65,43 @@ export default function SuivreCommande() {
       <Text style={styles.titre}>Suivi de la commande</Text>
       <FlatList
         data={activeOrders}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
-          const first = item.items[0];
-          const totalQty = item.items.reduce((s, it) => s + it.quantity, 0);
-          // Map status to step index
-          const currentStep = item.status === 'pending' ? 0 : item.status === 'accepted' ? 1 : 2;
-          const showConfirmButtons = item.status === 'delivered_vendor' || item.status === 'delivery_disputed';
+          const totalAmount = parseFloat(item.montant);
+          const statusTranslations: { [key: string]: string } = {
+            'en_attente': 'En attente',
+            'en_cours_pour_la_livraison': 'En cours de livraison',
+            'livree': 'Livrée',
+            'annulee': 'Annulée'
+          };
+          const statusText = statusTranslations[item.status] || item.status;
+
+          // Map API status to step index
+          let currentStep = 0;
+          if (item.status === 'en_cours_pour_la_livraison') {
+            currentStep = 1;
+          } else if (item.status === 'livree') {
+            currentStep = 2;
+          }
+
+          const totalQty = item.ligneCommande.reduce((total, ligne) => total + ligne.quantite, 0);
 
           return (
             <View style={styles.card}>
-              <Link href="/pages/transaction/recu" style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {first?.image ? (
-                  typeof first.image === 'string' ? (
-                    <Image source={{ uri: first.image }} style={styles.image} />
-                  ) : (
-                    <Image source={first.image} style={styles.image} />
-                  )
-                ) : (
-                  <View style={[styles.image, { backgroundColor: '#eee' }]} />)
-                }
-                <View style={styles.info}>
-                  <Text style={styles.nom}>{first?.name ?? 'Commande'}</Text>
-                  <Text style={styles.quantite}>Quantité totale : {totalQty}</Text>
-                </View>
-              </Link>
+              <View style={styles.cardHeader}>
+                <Text style={styles.nom}>Commande #{item.id}</Text>
+                <Text style={[styles.status, getStatusStyle(item.status)]}>{statusText}</Text>
+              </View>
+
+              <View style={styles.cardInfo}>
+                <Text style={styles.date}>Date: {new Date(item.createdAt || (item as any).date).toLocaleDateString('fr-FR')}</Text>
+                <Text style={styles.montant}>{totalAmount} F</Text>
+                <Text style={styles.quantite}>Quantité totale : {totalQty} article(s)</Text>
+              </View>
 
               <View style={styles.etapesContainer}>
                 {etapes.map((etape, index) => (
-                  <View key={`${item.id}-${etape}`} style={styles.etapeItem}>
+                  <View key={`${item.id}-${index}`} style={styles.etapeItem}>
                     <View
                       style={[styles.circle, index <= currentStep ? styles.active : styles.inactive]}
                     />
@@ -67,34 +111,51 @@ export default function SuivreCommande() {
                 ))}
               </View>
 
-              {showConfirmButtons && (
-                <View style={{ marginTop: 12 }}>
-                  <Text style={{ marginBottom: 8 }}>Confirmez-vous la livraison ?</Text>
-                  <View style={{ flexDirection: 'row', gap: 12 }}>
-                    <Pressable onPress={() => setOrderStatus(item.id, 'delivered_confirmed')} style={[styles.btn, styles.btnPrimary]}>
-                      <Text style={styles.btnText}>Livré</Text>
-                    </Pressable>
-                    <Pressable onPress={() => setOrderStatus(item.id, 'delivery_disputed')} style={[styles.btn, styles.btnDanger]}>
-                      <Text style={styles.btnText}>Non livré</Text>
-                    </Pressable>
-                  </View>
-                  {item.status === 'delivery_disputed' && (
-                    <View style={{ marginTop: 8 }}>
-                      <Text style={{ color: '#a00' }}>Nous vous donnerons une explication d'ici trois jours.</Text>
-                      <Pressable onPress={() => setOrderStatus(item.id, 'delivered_confirmed')} style={[styles.btn, styles.btnLink]}>
-                        <Text style={[styles.btnText, { color: '#4F46E5' }]}>Changer d'avis: Marquer comme livré</Text>
-                      </Pressable>
-                    </View>
-                  )}
-                </View>
-              )}
+              {/* Bouton Voir le reçu */}
+              <View style={styles.receiptButtonContainer}>
+                <Link
+                  href={{
+                    pathname: '/pages/transaction/recu',
+                    params: { orderData: JSON.stringify(item) }
+                  }}
+                  asChild
+                >
+                  <Pressable style={[styles.btn, styles.btnPrimary]}>
+                    <Text style={styles.btnText}>Voir le reçu</Text>
+                  </Pressable>
+                </Link>
+              </View>
             </View>
           );
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3b82f6']}
+          />
+        }
+        contentContainerStyle={{ paddingBottom: 40 }}
       />
     </View>
   );
 }
+
+// Helper function for status styling
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case 'en_attente':
+      return styles.statusPending;
+    case 'en_cours_pour_la_livraison':
+      return styles.statusInProgress;
+    case 'livree':
+      return styles.statusDelivered;
+    case 'annulee':
+      return styles.statusCancelled;
+    default:
+      return styles.statusPending;
+  }
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -114,6 +175,49 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  status: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusPending: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+  },
+  statusInProgress: {
+    backgroundColor: '#dbeafe',
+    color: '#1e40af',
+  },
+  statusDelivered: {
+    backgroundColor: '#d1fae5',
+    color: '#065f46',
+  },
+  statusCancelled: {
+    backgroundColor: '#fee2e2',
+    color: '#991b1b',
+  },
+  cardInfo: {
+    marginBottom: 12,
+  },
+  date: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  montant: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 4,
   },
   image: {
     width: 80,
@@ -172,6 +276,10 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#ccc',
     marginHorizontal: 4,
+  },
+  receiptButtonContainer: {
+    marginTop: 16,
+    alignItems: 'center',
   },
   btn: {
     paddingVertical: 10,

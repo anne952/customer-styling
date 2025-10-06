@@ -1,25 +1,71 @@
 import { useOrder } from "@/components/order-context";
+import { Link, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, StyleSheet, Text, View, Pressable } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ReceiptScreen() {
   const { lastOrder, selectedPaymentMethodId } = useOrder();
+  const params = useLocalSearchParams();
 
-  if (!lastOrder) {
+  // Check if order data is passed via route params (from suurre-commande or historique)
+  const orderDataParam = Array.isArray(params.orderData) ? params.orderData[0] : params.orderData;
+  const backendOrder = orderDataParam ? JSON.parse(orderDataParam) : null;
+
+  // Use backend order if available, otherwise fallback to context order
+  const currentOrder = backendOrder || lastOrder;
+
+  if (!currentOrder) {
     return (
       <View style={styles.container}>
-        <Text style={styles.sectionTitle}>Aucune commande</Text>
-        <Text>Aucune commande récente n'a été trouvée.</Text>
+        {/* Bouton retour */}
+        <View style={styles.header}>
+          <Link href="/pages/transaction/suvre-commande" style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </Link>
+          <Text style={styles.headerTitle}>Reçu</Text>
+        </View>
+
+        <View style={styles.emptyContainer}>
+          <Text style={styles.sectionTitle}>Aucune commande</Text>
+          <Text>Aucune commande n'a été trouvée.</Text>
+        </View>
       </View>
     );
   }
 
-  const products = lastOrder.items;
-  const subtotal = lastOrder.subtotal;
-  const discount = lastOrder.discount;
-  const total = lastOrder.total;
+  // Handle different order structures (backend vs frontend)
+  let products, subtotal, discount, total, paymentLabel;
 
-  const paymentLabel = lastOrder.paymentMethodId === 'flooz' ? 'Flooz' : lastOrder.paymentMethodId === 'mixx' ? 'Mixx by Yas' : '—';
+  if (backendOrder) {
+    // Backend order structure
+    products = backendOrder.ligneCommande.map((ligne: any) => ({
+      id: ligne.produitId,
+      name: ligne.produit?.nom || 'Produit',
+      quantity: ligne.quantite,
+      price: parseFloat(ligne.prixUnitaire),
+      image: ligne.produit?.productImages?.[0]?.url
+    }));
+    subtotal = parseFloat(backendOrder.montant);
+    discount = 0; // Backend doesn't track discount separately
+    total = parseFloat(backendOrder.montant);
+
+    const statusTranslations: { [key: string]: string } = {
+      'tmoney': 'Tmoney',
+      'flooz': 'Flooz',
+      'mixx': 'Mixx by Yas'
+    };
+    paymentLabel = backendOrder.payement?.moyenDePayement
+      ? statusTranslations[backendOrder.payement.moyenDePayement.toLowerCase()] || backendOrder.payement.moyenDePayement
+      : 'Non spécifié';
+  } else {
+    // Frontend order structure
+    products = currentOrder.items;
+    subtotal = currentOrder.subtotal;
+    discount = currentOrder.discount;
+    total = currentOrder.total;
+    paymentLabel = currentOrder.paymentMethodId === 'flooz' ? 'Flooz' : currentOrder.paymentMethodId === 'mixx' ? 'Mixx by Yas' : '—';
+  }
 
   return (
     <View style={styles.container}>
@@ -81,6 +127,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 50,
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   section: {
     marginTop: 0,

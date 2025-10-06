@@ -1,25 +1,28 @@
 import { useCart } from "@/components/cart-context";
-import { useOrder } from "@/components/order-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 
 type PaymentMethod = {
-  id: string;
+  id: "Tmoney" | "Flooz";
   name: string;
   image: string;
 };
 
 export default function ChoosePaymentScreen() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const { setSelectedPaymentMethod } = useOrder();
-  const { totalCount } = useCart();
+  const [selected, setSelected] = useState<"Tmoney" | "Flooz" | null>(null);
+  const { totalCount, totalPrice } = useCart();
 
   const paymentMethods: PaymentMethod[] = [
-    { id: "flooz", name: "Flooz", image: "https://via.placeholder.com/60" },
-    { id: "mixx", name: "Mixx by Yas", image: "https://via.placeholder.com/60" },
+    { id: "Tmoney", name: "Tmoney", image: "https://via.placeholder.com/60" },
+    { id: "Flooz", name: "Flooz", image: "https://via.placeholder.com/60" },
   ];
+
+  const handlePaymentSelection = (paymentMethod: "Tmoney" | "Flooz") => {
+    setSelected(paymentMethod);
+    // On peut stocker le choix dans AsyncStorage ou contexte si nécessaire
+  };
 
   if (totalCount === 0) {
     return (
@@ -51,7 +54,7 @@ export default function ChoosePaymentScreen() {
         <TouchableOpacity
           key={method.id}
           style={styles.paymentRow}
-          onPress={() => { setSelected(method.id); setSelectedPaymentMethod(method.id); }}
+          onPress={() => handlePaymentSelection(method.id)}
         >
           <Image source={{ uri: method.image }} style={styles.paymentImage} />
           <Text style={styles.paymentName}>{method.name}</Text>
@@ -68,7 +71,7 @@ export default function ChoosePaymentScreen() {
         </Link>
       ) : (
         <View style={[styles.button, { backgroundColor: "#ccc" }]}>
-          <Text style={styles.buttonText}>Continuer</Text>
+          <Text style={styles.buttonText}>Sélectionnez un moyen de paiement</Text>
         </View>
       )}
     </View>
