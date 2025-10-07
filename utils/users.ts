@@ -201,3 +201,43 @@ export async function searchUsers(query: string): Promise<User[]> {
     return [];
   }
 }
+
+export async function getUserLikes(userId: number): Promise<number[]> {
+  console.log('[GET USER LIKES] Getting likes for user:', userId);
+  try {
+    const response = await apiRequest(`/api/users/${userId}/likes`);
+    console.log('[GET USER LIKES] Likes:', response.data);
+    return response.data; // Array of product ids
+  } catch (error) {
+    console.error('[GET USER LIKES] Failed:', error);
+    throw error;
+  }
+}
+
+export async function likeProduct(produitId: number): Promise<void> {
+  console.log('[LIKE PRODUCT] Liking product:', produitId);
+  try {
+    await apiRequest('/api/likes', {
+      method: 'POST',
+      body: JSON.stringify({ produitId }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    console.log('[LIKE PRODUCT] Liked successfully');
+  } catch (error) {
+    console.error('[LIKE PRODUCT] Failed:', error);
+    throw error;
+  }
+}
+
+export async function unlikeProduct(produitId: number): Promise<void> {
+  console.log('[UNLIKE PRODUCT] Unliking product:', produitId);
+  try {
+    await apiRequest(`/api/likes/${produitId}`, {
+      method: 'DELETE',
+    });
+    console.log('[UNLIKE PRODUCT] Unliked successfully');
+  } catch (error) {
+    console.error('[UNLIKE PRODUCT] Failed:', error);
+    throw error;
+  }
+}

@@ -108,6 +108,7 @@ export default function SearchScreen() {
             paddingHorizontal: 8,
           }}
           placeholder="Rechercher produit ou vendeur..."
+          placeholderTextColor="#999"
           value={query}
           onChangeText={setQuery}
           autoCorrect={false}

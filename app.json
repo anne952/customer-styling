@@ -16,8 +16,6 @@
       }
     },
     "android": {
-      
-
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -31,10 +29,13 @@
       "notification": {
         "icon": "./assets/images/icon.png",
         "color": "#606FEF",
-        "defaults": ["vibrate"],
+        "defaults": [
+          "vibrate"
+        ],
         "mode": "default",
         "collapsedTitle": "Styling"
-      }
+      },
+      "package": "com.anne_k.customerstyling"
     },
     "web": {
       "bundler": "metro",
@@ -55,6 +56,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1b06c9d3-e650-4964-83fb-93b81771bbe5"
+      }
     }
   }
 }

@@ -24,8 +24,8 @@ export type PlacedOrder = {
 };
 
 type OrderContextValue = {
-	selectedPaymentMethodId: string | null;
-	setSelectedPaymentMethod: (id: string | null) => void;
+	selectedPaymentMethodId: 'Tmoney' | 'Flooz' | null;
+	setSelectedPaymentMethod: (id: 'Tmoney' | 'Flooz' | null) => void;
 	lastOrder: PlacedOrder | null;
 	orders: PlacedOrder[];
 	placeOrder: (params: { items: CartItem[]; discount?: number }) => PlacedOrder;
@@ -35,11 +35,11 @@ type OrderContextValue = {
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 
 export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
-	const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | null>(null);
+	const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<'Tmoney' | 'Flooz' | null>(null);
 	const [lastOrder, setLastOrder] = useState<PlacedOrder | null>(null);
 	const [orders, setOrders] = useState<PlacedOrder[]>([]);
 
-	const setSelectedPaymentMethod = useCallback((id: string | null) => {
+	const setSelectedPaymentMethod = useCallback((id: 'Tmoney' | 'Flooz' | null) => {
 		setSelectedPaymentMethodId(id);
 	}, []);
 

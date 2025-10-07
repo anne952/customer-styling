@@ -62,6 +62,7 @@ export default function edit(){
         </View>
         <View className="mt-10 gap-10">
             <TextInput placeholder="Nom"
+            placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -69,6 +70,7 @@ export default function edit(){
             keyboardType="default"
             />
             <TextInput placeholder="Email"
+            placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -78,6 +80,7 @@ export default function edit(){
             />
 
             <TextInput placeholder="Téléphone"
+            placeholderTextColor="#999"
             value={telephone}
             onChangeText={setTelephone}
             autoCapitalize="none"
@@ -87,6 +90,7 @@ export default function edit(){
             />
 
             <TextInput placeholder="Localisation"
+            placeholderTextColor="#999"
             value={localisation}
             onChangeText={setLocalisation}
             autoCapitalize="words"

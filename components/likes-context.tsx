@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCurrentUser } from "../utils/users";
+import { getCurrentUser, getUserLikes, likeProduct, unlikeProduct } from "../utils/users";
 
 type LikesContextValue = {
 	likedIds: Set<number>;
@@ -27,25 +27,39 @@ export const LikesProvider = ({ children }: { children: React.ReactNode }) => {
 	const loadPersistence = async () => {
 		try {
 			const storedUserId = await AsyncStorage.getItem(CURRENT_USER_ID_KEY);
-			const storedLikes = await AsyncStorage.getItem(LIKES_STORAGE_KEY);
-
-			if (storedLikes) {
-				const likesData = JSON.parse(storedLikes);
-				setLikedIdsState(new Set(likesData.likedProductIds || []));
-			}
-
-			// Check if current user matches stored user
 			const user = await getCurrentUser();
 			const userId = user.id;
 
 			if (storedUserId !== String(userId)) {
-				// Different user - clear stored likes
-				setLikedIdsState(new Set());
-				setCurrentUserId(userId);
-				await AsyncStorage.setItem(CURRENT_USER_ID_KEY, String(userId));
-				await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify({ likedProductIds: [] }));
+				// Different user - load from API
+				try {
+					const apiLikes = await getUserLikes(userId);
+					setLikedIdsState(new Set(apiLikes));
+					setCurrentUserId(userId);
+					await AsyncStorage.setItem(CURRENT_USER_ID_KEY, String(userId));
+					await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify({ likedProductIds: apiLikes }));
+				} catch {
+					setLikedIdsState(new Set());
+					setCurrentUserId(userId);
+					await AsyncStorage.setItem(CURRENT_USER_ID_KEY, String(userId));
+					await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify({ likedProductIds: [] }));
+				}
 			} else {
+				// Same user, first try to load from API, fallback to storage
 				setCurrentUserId(userId);
+				try {
+					const apiLikes = await getUserLikes(userId);
+					setLikedIdsState(new Set(apiLikes));
+					// Update storage with API data
+					await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify({ likedProductIds: apiLikes }));
+				} catch {
+					// Fallback to storage
+					const storedLikes = await AsyncStorage.getItem(LIKES_STORAGE_KEY);
+					if (storedLikes) {
+						const likesData = JSON.parse(storedLikes);
+						setLikedIdsState(new Set(likesData.likedProductIds || []));
+					}
+				}
 			}
 		} catch (error) {
 			console.error('Failed to load persistence:', error);
@@ -84,20 +98,10 @@ export const LikesProvider = ({ children }: { children: React.ReactNode }) => {
 
 		try {
 			setIsLoading(true);
-			const user = await getCurrentUser();
-
 			if (isCurrentlyLiked) {
-				// TODO: Call DELETE /api/likes or handle through user/product endpoints
-				// await apiRequest(`/api/users/${user.id}/likes/${productId}`, { method: 'DELETE' });
-				console.log(`Unliked product ${productId} for user ${user.id}`);
+				await unlikeProduct(productId);
 			} else {
-				// TODO: Call POST /api/likes or handle through user/product endpoints
-				// await apiRequest('/api/likes', {
-				//   method: 'POST',
-				//   body: JSON.stringify({ usersId: user.id, produitId: productId }),
-				//   headers: { 'Content-Type': 'application/json' },
-				// });
-				console.log(`Liked product ${productId} for user ${user.id}`);
+				await likeProduct(productId);
 			}
 		} catch (error) {
 			console.error('Failed to toggle like:', error);

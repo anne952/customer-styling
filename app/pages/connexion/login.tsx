@@ -3,11 +3,13 @@ import { Link, router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Text, TextInput, View, TouchableOpacity, ActivityIndicator } from "react-native";
 import { login, LoginCredentials } from "../../../utils/users";
+import { useUser } from "../../../components/user-context";
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { updateUser } = useUser();
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -29,6 +31,14 @@ export default function Login() {
       };
 
       const response = await login(credentials);
+
+      // Met à jour les informations utilisateur dans le contexte
+      updateUser({
+        name: response.user.nom,
+        email: response.user.email,
+        telephone: response.user.telephone,
+        localisation: response.user.localisation
+      });
 
       // Redirection vers la page principale après connexion réussie
       router.replace('/pages/(tabs)');
@@ -58,7 +68,7 @@ export default function Login() {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10 }}
+            style={{ width: 300, height: 50, color:"#FFFFFFF", borderWidth: 1, borderRadius: 10, paddingLeft: 10, backgroundColor:"#CECECE" }}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -67,7 +77,7 @@ export default function Login() {
             placeholder="Mot de passe"
             value={password}
             onChangeText={setPassword}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+            style={{ width: 300, height: 50,color:"#FFFFFFF", borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 ,backgroundColor:"#CECECE" }}
             secureTextEntry={true}
           />
 

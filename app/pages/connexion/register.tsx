@@ -96,7 +96,7 @@ export default function Register() {
             placeholder="Nom"
             value={nom}
             onChangeText={setNom}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10 }}
+            style={{ width: 300, height: 50, color:"#FFFFFFF",borderWidth: 1, borderRadius: 10, paddingLeft: 10 , backgroundColor:"#CECECE"}}
             keyboardType="default"
           />
 
@@ -104,7 +104,7 @@ export default function Register() {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+            style={{ width: 300, height: 50,color:"#FFFFFFF", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16, backgroundColor:"#CECECE" }}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -113,7 +113,7 @@ export default function Register() {
             placeholder="Mot de passe (min 6 caractères)"
             value={password}
             onChangeText={setPassword}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+            style={{ width: 300, height: 50, color:"#FFFFFFF", backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
             secureTextEntry={true}
           />
 
@@ -121,7 +121,7 @@ export default function Register() {
             placeholder="Localisation"
             value={localisation}
             onChangeText={setLocalisation}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+            style={{ width: 300, height: 50,color:"#FFFFFFF",  backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
             keyboardType="default"
           />
 
@@ -129,7 +129,7 @@ export default function Register() {
             placeholder="Numéro de téléphone (ex: +228XXXXXXXX ou 9XXXXXXXX)"
             value={telephone}
             onChangeText={setTelephone}
-            style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+            style={{ width: 300, height: 50,color:"#FFFFFFF",  backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
             keyboardType="phone-pad"
           />
 

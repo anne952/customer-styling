@@ -1,4 +1,5 @@
 import { useCart } from "@/components/cart-context";
+import { useOrder } from "@/components/order-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -10,6 +11,7 @@ export default function PaymentCodeScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { items, clearCart, totalCount, totalPrice } = useCart();
+  const { selectedPaymentMethodId } = useOrder();
 
   const handleContinue = async () => {
     console.log('[PAYMENT] Submit pressed');
@@ -44,7 +46,7 @@ export default function PaymentCodeScreen() {
         items: orderItems,
         payement: {
           montant: totalPrice.toString(),
-          moyenDePayement: "Tmoney"  // ou "Flooz" selon ce qui a été sélectionné
+          moyenDePayement: selectedPaymentMethodId || "Tmoney"
         }
       };
 

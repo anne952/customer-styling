@@ -1,7 +1,8 @@
 import { useCart } from "@/components/cart-context";
+import { useOrder } from "@/components/order-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 
 type PaymentMethod = {
@@ -11,7 +12,7 @@ type PaymentMethod = {
 };
 
 export default function ChoosePaymentScreen() {
-  const [selected, setSelected] = useState<"Tmoney" | "Flooz" | null>(null);
+  const { selectedPaymentMethodId, setSelectedPaymentMethod } = useOrder();
   const { totalCount, totalPrice } = useCart();
 
   const paymentMethods: PaymentMethod[] = [
@@ -20,7 +21,7 @@ export default function ChoosePaymentScreen() {
   ];
 
   const handlePaymentSelection = (paymentMethod: "Tmoney" | "Flooz") => {
-    setSelected(paymentMethod);
+    setSelectedPaymentMethod(paymentMethod);
     // On peut stocker le choix dans AsyncStorage ou contexte si nécessaire
   };
 
@@ -59,13 +60,13 @@ export default function ChoosePaymentScreen() {
           <Image source={{ uri: method.image }} style={styles.paymentImage} />
           <Text style={styles.paymentName}>{method.name}</Text>
           <View style={styles.radioOuter}>
-            {selected === method.id && <View style={styles.radioInner} />}
+            {selectedPaymentMethodId === method.id && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
       ))}
 
       {/* Bouton continuer (link vers la page suivante) */}
-      {selected ? (
+      {selectedPaymentMethodId ? (
         <Link href="/pages/transaction/code-payement" style={styles.button}>
           <Text style={styles.buttonText}>Continuer</Text>
         </Link>

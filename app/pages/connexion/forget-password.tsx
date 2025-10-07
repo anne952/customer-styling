@@ -14,17 +14,20 @@ export default function ForgetPassword() {
            >
                <TextInput
                    placeholder="Entrez votre adresse e-mail"
-                   style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+                   placeholderTextColor="#999"
+                   style={{ width: 300, height: 50,  backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
                    keyboardType="email-address"
                />
                <TextInput
                    placeholder="Entrer votre nouveau mot de passe"
-                   style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+                   placeholderTextColor="#999"
+                   style={{ width: 300, height: 50,  backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
                    secureTextEntry={true}
                />
                <TextInput
                    placeholder="Confirmer le mot de passe"
-                   style={{ width: 300, height: 50, borderColor: "black", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
+                   placeholderTextColor="#999"
+                   style={{ width: 300, height: 50,  backgroundColor:"#CECECE", borderWidth: 1, borderRadius: 10, paddingLeft: 10, marginTop: 16 }}
                    secureTextEntry={true}
                />
            </View>
